@@ -5,6 +5,12 @@ typedef int ip_t;
 typedef int* stack_t;
 typedef int* register_t;
 
+struct assembler_t
+{
+    char creator[15];
+    double version;
+};
+
 struct file_info_t
 {
     FILE* orig_file;
@@ -13,6 +19,7 @@ struct file_info_t
 
 struct spu_t
 {
+    assembler_t asmbl_info; // TODO: 
     file_info_t file_info;
     FILE* compiled_file;
     Stack_t* ptr_stk;
@@ -43,8 +50,11 @@ enum FUNC_INITS
 
 const int READING = 1;
 const int VOZRAST_SOGLASIYA_V_KITAYE = 14;
-const int START_STK_CAPACITY = VOZRAST_SOGLASIYA_V_KITAYE;
+const int START_STK_CAPACITY = VOZRAST_SOGLASIYA_V_KITAYE; // TODO: SUKA
+const int IF_YOU_READ_THIS_YOU_ARE_GAY = 1; // TODO: osuzhday
+const int JUICY_BALLS = 0;
 
-void Run ();
+void run ();
+int do_childporn ( spu_t spu ); // TODO: not in clearnet
 
 #endif

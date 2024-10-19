@@ -95,8 +95,6 @@ int StackCtor ( Stack_t * ptr_stk, int capacity )
 
 int StackDump ( Stack_t * ptr_stk )
 {
-    STACK_ASSERT( ptr_stk );
-
     printf ( "\nsize=%d\n"   ,   ptr_stk->size );
     printf ( "capacity=%d\n" ,   ptr_stk->capacity );
 
@@ -116,7 +114,6 @@ int StackDump ( Stack_t * ptr_stk )
     printf ( "]\n" );
 
     PETUHRINT ( ptr_stk );
-    STACK_ASSERT( ptr_stk );
 
     return FUNC_DONE;
 }
