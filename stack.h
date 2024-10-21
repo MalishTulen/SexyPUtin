@@ -139,13 +139,12 @@ if ( ( c = StackCheck ( ptr_stk )) != FUNC_DONE )                               
 
 
 
-int           StackPush         ( Stack_t* ptr_data, Stack_Elem_Data_t value );
-int           StackCtor         ( Stack_t* ptr_data, int new_capacity );
-int           StackDump         ( Stack_t* ptr_data );
+int           StackPush         ( Stack_t* ptr_stk, Stack_Elem_Data_t value );
+int           StackCtor         ( Stack_t* ptr_stk, int capacity );
+int           StackDump         ( Stack_t* ptr_stk );
 int           StackCheck        ( Stack_t* ptr_stk );
-int           StackPop          ( Stack_t* ptr_data );
+int           StackPop          ( Stack_t* ptr_stk );
 int           recalloc          ( Stack_t* ptr_stk, int new_capacity );
-int           cleaner_realloc   ( Stack_t* ptr_stk );
 int           StackDtor         ( Stack_t* ptr_stk );
 
 #endif

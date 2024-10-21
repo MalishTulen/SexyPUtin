@@ -10,7 +10,7 @@
 #include "hash.h"
 
 #ifdef HASH_PROTECT
-    int give_equalazer ( Stack * ptr_stk, int capacity )
+    int give_equalazer ( Stack_t * ptr_stk, int capacity )
     {
         if ( ( capacity * sizeof ( int ) ) % sizeof ( canary_t ) == 0 )
             ptr_stk->equalazer = 0;
@@ -21,7 +21,7 @@
     }
 #endif
 #ifdef HASH_PROTECT
-    bool hash_check ( Stack* ptr_stk )
+    bool hash_check ( Stack_t* ptr_stk )
     {
         unsigned long check_hash_sum = 0;
 
@@ -37,7 +37,7 @@
         }
     }
 
-    unsigned long one_hash ( Stack * ptr_stk )
+    unsigned long one_hash ( Stack_t * ptr_stk )
     {
         unsigned long hash_coefficient = 5381;
         unsigned long hash_result      =    0;
@@ -55,46 +55,44 @@
 
 int StackCtor ( Stack_t * ptr_stk, int capacity )
 {
-    if ( capacity < 0 )
-    {
-        return -1;
-    }
     ptr_stk->size     =        0;
     ptr_stk->capacity = capacity;
     #ifdef CANARY_PROTECT
         give_equalazer ( ptr_stk, capacity );
     #endif
-
+//fprintf ( stderr, "p1\n" );
     #ifdef CANARY_PROTECT
-        size_t size = ( 2 + capacity + ptr_stk->equalazer );
+        size_t size = ( 2 * sizeof ( canary_t ) + capacity + ptr_stk->equalazer );
     #else
         size_t size = ( capacity );
     #endif
+//fprintf ( stderr, "p1\n" );
 
     Stack_Elem_Data_t * tmp_ptr = ( Stack_Elem_Data_t * ) calloc ( size, sizeof ( Stack_Elem_Data_t ) );
-
     #ifdef CANARY_PROTECT
         ptr_stk->data_ptr = ( Stack_Elem_Data_t* ) ( ( char* ) tmp_ptr + sizeof ( canary_t ) );
     #else
         ptr_stk->data_ptr = ( tmp_ptr );
     #endif
+//fprintf ( stderr, "p1\n" );
 
     #ifdef HASH_PROTECT
         ptr_stk->hehesh = GIVE_ME_HASH( ptr_stk );
     #endif
-
     CANARY_INIT( ptr_stk );
+//fprintf ( stderr, "STKDMP1\n" );
 
-    StackDump( ptr_stk );
-
-    STACK_ASSERT( ptr_stk );
-
+    //StackDump ( ptr_stk );
+//fprintf ( stderr, "STKDMP2\n" );
+    STACK_ASSERT ( ptr_stk );
+//fprintf ( stderr, "p134\n" );
     return FUNC_DONE;
 }
 
 
 int StackDump ( Stack_t * ptr_stk )
 {
+//fprintf ( stderr, "STKDMP1\n" );
     printf ( "\nsize=%d\n"   ,   ptr_stk->size );
     printf ( "capacity=%d\n" ,   ptr_stk->capacity );
 
@@ -106,13 +104,14 @@ int StackDump ( Stack_t * ptr_stk )
         printf ( "equalazer=%d\n",   ptr_stk->equalazer );
     #endif
 
-    printf ( "Stack:[ " );
+    printf ( "Stack_t:[ " );
     for ( int i = 0 ; i < ( ptr_stk->capacity ); i++ )
     {
         printf ( "(%d) ", *(ptr_stk->data_ptr + i )  );
     }
     printf ( "]\n" );
-
+//fprintf ( stderr, "STKDMP2\n" );
+//fprintf ( stderr, "STKDMP3\n" );
     PETUHRINT ( ptr_stk );
 
     return FUNC_DONE;
@@ -151,7 +150,7 @@ int StackCheck ( Stack_t * ptr_stk )
 int StackPop ( Stack_t * ptr_stk )
 {
     STACK_ASSERT( ptr_stk );
-
+//fprintf ( stderr, "bef everything\n" );
     if ( ptr_stk->size == 0 )
     {
         printf ( "\nStack have zero elements! Try to add elements before using StackPopa!");
@@ -159,20 +158,22 @@ int StackPop ( Stack_t * ptr_stk )
     }
     else
     {
-        if ( ptr_stk->size < ptr_stk->capacity/2 )
+//fprintf ( stderr, "bef recalloc\n" );
+        if ( ptr_stk->size < ptr_stk->capacity / 2 )
         {
-        ptr_stk->data_ptr = ( Stack_Elem_Data_t* ) realloc ( ptr_stk,  ptr_stk->capacity / 4 );
+        ptr_stk->data_ptr = ( Stack_Elem_Data_t* ) realloc ( ptr_stk->data_ptr, ( ptr_stk->capacity ) / 4 * 3 );
         }
-        int ruka = *( ptr_stk->data_ptr + ptr_stk->size - 1 );
-        printf ("%d", ruka );
+        int ruka = ptr_stk->data_ptr [ ptr_stk->size - 1 ];
+//fprintf ( stderr, "aft recalloc\n" );
+        printf ("pop result - %d\n", ruka );
+
+
+        ptr_stk->data_ptr [ ptr_stk->size - 1 ] = 0;
+        (ptr_stk->size)--;
 
         #ifdef HASH_PROTECT
             ptr_stk->hehesh = GIVE_ME_HASH( ptr_stk );
         #endif
-
-        *( ptr_stk->data_ptr + ptr_stk->size - 1 ) = 0;
-        (ptr_stk->size)--;
-
         STACK_ASSERT( ptr_stk );
 
         return ( ruka );
@@ -181,7 +182,7 @@ int StackPop ( Stack_t * ptr_stk )
 
 int StackPush ( Stack_t * ptr_stk, Stack_Elem_Data_t value )
 {
-    STACK_ASSERT( ptr_stk  );
+    STACK_ASSERT( ptr_stk );
 
     if ( ptr_stk->size == ptr_stk->capacity )
     {
@@ -193,7 +194,6 @@ int StackPush ( Stack_t * ptr_stk, Stack_Elem_Data_t value )
     #ifdef HASH_PROTECT
         ptr_stk->hehesh = GIVE_ME_HASH ( ptr_stk );
     #endif
-
     STACK_ASSERT( ptr_stk );
 
     return FUNC_DONE;
@@ -203,31 +203,20 @@ int recalloc ( Stack_t* ptr_stk, int new_capacity )
 {
     #ifdef CANARY_PROTECT
         give_equalazer ( ptr_stk, new_capacity );
-        Stack_Elem_Data_t * tmp_ptr = ( Stack_Elem_Data_t* ) realloc ( ( char* ) ptr_stk->data_ptr - sizeof ( canary_t), new_capacity * sizeof ( Stack_Elem_Data_t ) + 2 * sizeof ( canary_t)  + ptr_stk->equalazer );
+        Stack_Elem_Data_t * tmp_ptr = ( Stack_Elem_Data_t* ) realloc ( ( Stack_Elem_Data_t* ) ( ( char* ) ptr_stk->data_ptr - sizeof ( canary_t) ), ( char ) new_capacity + 2 * sizeof ( canary_t)  + ptr_stk->equalazer );
         ptr_stk->data_ptr = ( Stack_Elem_Data_t* ) ( ( char* ) tmp_ptr + sizeof ( canary_t ) );
     #else
-        Stack_Elem_Data_t * tmp_ptr = ( Stack_Elem_Data_t* ) realloc ( ( char* ) ptr_stk->data_ptr, new_capacity * sizeof ( Stack_Elem_Data_t )  );
-        ptr_stk->data_ptr = tmp_ptr;
+        ptr_stk->data_ptr = ( Stack_Elem_Data_t* ) realloc ( ( char* ) ptr_stk->data_ptr, new_capacity  );
     #endif
-
+//fprintf ( stderr, "p3\n" );
     if (ptr_stk->capacity < new_capacity )
-        cleaner_realloc ( ptr_stk );
+        for ( int i = ptr_stk->size; i < new_capacity; i++ )
+        {
+            ptr_stk->data_ptr [ i ] = 0;
+        }
+//fprintf ( stderr, "p4\n" );
 
     POPA_PETUHA( ptr_stk );
-
-    STACK_ASSERT( ptr_stk );
-
-    return FUNC_DONE;
-}
-
-int cleaner_realloc ( Stack_t* ptr_stk )
-{
-    STACK_ASSERT( ptr_stk  );
-
-    for ( int i = ptr_stk->capacity; i < ((ptr_stk->capacity * 2) ); i++ )
-    {
-        *( ptr_stk->data_ptr + i  ) = 0;
-    }
 
     STACK_ASSERT( ptr_stk );
 
@@ -253,3 +242,4 @@ int StackDtor ( Stack_t* ptr_stk )
 
     return FUNC_DONE;
 }
+
