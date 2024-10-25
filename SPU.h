@@ -1,31 +1,9 @@
-#ifndef CPU_HEADER
-#define CPU_HEADER
+#ifndef SPU_HEADER
+#define SPU_HEADER
 
 typedef int ip_t;
 typedef int* stack_t;
-typedef int* register_t;
-
-struct assembler_t
-{
-    char creator[15];
-    double version;
-};
-
-struct file_info_t
-{
-    FILE* orig_file;
-    int elems_amount;
-};
-
-struct spu_t
-{
-    assembler_t asmbl_info; // TODO:
-    file_info_t file_info;
-    FILE* compiled_file;
-    Stack_t* ptr_stk;
-    ip_t ip;
-    register_t reg_array[10];
-};
+typedef int register_t;
 
 enum FUNC_INITS
 {
@@ -45,35 +23,51 @@ enum FUNC_INITS
     JB = 13,
     JBE  = 14,
     JE = 15,
-    JNE = 16
+    JNE = 16,
+    CALL = 17,
+    RET = 18,
 };
 
 enum ERRORS
 {
     BAD_FILE_ERROR = 3,
     SYNTAX_ERROR = 6,
+    NOT_ENOUGH_REGISTERS = 9,
+    BAD_ERROR = 667,
 };
 const int READING = 1;
+const int REG_ARRAY_CAPACITY = 5;
 const int START_STK_CAPACITY = 14;
 const int JUICY_BALLS = 0;
+const int REG_NOT_EXISTS = -1;
+const int MAX_CMD_SIZE = 500;
 
-#define BIG_DUMP( spu )     {                             \
-    printf ( "\n"                                                 \
-             "------------------------------------------------\n"   \
-             "|                  BIG DUMP                    |\n"   \
-             "| CREATOR - (TODO)                             |\n"   \
-             "| VERSION - (TODO)                             |\n"   \
-             "------------------------------------------------\n"   \
-             "|                  REGISTERS                   |\n"   \
-             "| there should be registers... TODO....        |\n"   \
-             "------------------------------------------------\n"   \
-             "|                   STACK                      |\n"); \
-    StackDump ( spu.ptr_stk );                                    \
-    printf ( "------------------------------------------------\n"); \
-    };
+struct assembler_t
+{
+    char creator[15];
+    double version;
+};
 
+struct cmd_t
+{
+    int* ptr_code;
+    int ip;
+    int size_code;
+};
+
+struct spu_t
+{
+    assembler_t asmbl_info;
+    FILE* compiled_file;
+    Stack_t* ptr_stk;
+    Stack_t* ptr_func_stk;
+    cmd_t cdm;
+    register_t reg_array [ REG_ARRAY_CAPACITY ];
+};
 
 void run ();
-int do_this_file ( spu_t spu );
+int do_this_file ( spu_t* ptr_spu );
+int big_dump ( spu_t* ptr_spu );
+int make_array_with_code ( spu_t* ptr_spu );
 
 #endif

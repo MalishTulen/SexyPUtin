@@ -4,6 +4,7 @@
 
 const int GOVNO = 0;
 
+#include "colourful.h"
 #include "stack.h"
 #include "hash.h"
 #include "SPU.h"

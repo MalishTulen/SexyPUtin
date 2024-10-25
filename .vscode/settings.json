@@ -4,6 +4,10 @@
         "hash_map": "cpp",
         "bitset": "cpp",
         "initializer_list": "cpp",
-        "vector": "cpp"
+        "vector": "cpp",
+        "functional": "cpp",
+        "tuple": "cpp",
+        "type_traits": "cpp",
+        "utility": "cpp"
     }
 }
