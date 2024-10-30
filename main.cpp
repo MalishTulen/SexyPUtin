@@ -1,13 +1,11 @@
 #include <stdio.h>
-#include <stdlib.h>
-#include <assert.h>
-
-const int GOVNO = 0;
 
 #include "colourful.h"
 #include "stack.h"
 #include "hash.h"
 #include "SPU.h"
+
+// TODO: do not include so many h files
 
 int main()
 {
