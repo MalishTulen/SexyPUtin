@@ -25,6 +25,7 @@ enum FUNC_INITS
     JNE = 16,
     CALL = 17,
     RET = 18,
+    DRAW = 20,
 };
 
 enum ERRORS
@@ -44,12 +45,11 @@ enum PUSH_TYPES
 };
 
 const int READING = 1;
-const int REG_ARRAY_CAPACITY = 5;
-const int START_STK_CAPACITY = 14;
-const int JUICY_BALLS = 0;
+const int REG_ARRAY_CAPACITY = 7;
+const int START_STK_CAPACITY = 8;
 const int REG_NOT_EXISTS = -1;
-const int MAX_CMD_SIZE = 500;
-const int RAM_CAPACITY = 10;
+const int MAX_CMD_SIZE = 1000;
+const int RAM_CAPACITY = 10000;
 
 struct assembler_t
 {

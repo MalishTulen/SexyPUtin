@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <string.h>
+#include <math.h>
 
 #include "colourful.h"
 #include "stack.h"
@@ -25,12 +26,13 @@ void run()
     spu.reg_array[ REG_ARRAY_CAPACITY ] = {};
     spu.cdm.ip = 0;
 
-
+//fprintf ( stderr, "DEBUG1\n");
     StackCtor ( spu.ptr_stk, START_STK_CAPACITY );
     StackCtor ( spu.ptr_func_stk, START_STK_CAPACITY );
-
+//fprintf ( stderr, "DEBUG2\n");
     make_array_with_code ( ptr_spu );
-
+//fprintf ( stderr, "DEBUG3\n");
+    big_dump ( ptr_spu );
     do_this_file ( ptr_spu );
 }
 
@@ -81,15 +83,18 @@ int big_dump ( spu_t* ptr_spu )
     printf ( "\n|                FUNC STACK                      |\n");
     StackDump ( ptr_spu->ptr_func_stk );
     printf ( "------------------------------------------------\n");
-    printf ( "\n|                    RAM                         |\n");
-    for ( int i = 0; i < RAM_CAPACITY; i++ )
-        printf ( "|%4d: %4d                                      |\n", i, RAM [ i ]);
+
     return FUNC_DONE;
 }
 
 int do_this_file ( spu_t* ptr_spu )
 {
-    int running = 1; // TODO: rename
+    if ( !ptr_spu )
+    {
+        fprintf ( stderr, "ERROR WITH OPENING FILE\n");
+    }
+    int running = 1;
+
     while ( running )
     {
         int cmd = ptr_spu->cdm.ptr_code [ ptr_spu->cdm.ip ];
@@ -103,7 +108,6 @@ int do_this_file ( spu_t* ptr_spu )
                 int* type_push = get_arg ( ptr_spu );
 
                 StackPush ( ptr_spu->ptr_stk, ( Stack_Elem_Data_t )( *type_push ) );
-                //ptr_spu->cdm.ip++;
                 break;
             }
             case SUM:
@@ -115,6 +119,22 @@ int do_this_file ( spu_t* ptr_spu )
             case DUMP:
             {
                 big_dump ( ptr_spu );
+                ptr_spu->cdm.ip++;
+                break;
+            }
+            case DRAW:
+            {
+                printf ( "\n|                    RAM                         |\n");
+                for ( int i = 0; i < RAM_CAPACITY + 1 ; i++ )
+                {
+                    if ( RAM [ i ] == 1 )
+                        printf ( "##");
+                    else
+                        printf ( ".." );
+                    if ( ( ( i )  % ( 100 ) == 0 ) && ( i != 0 ) )
+                        printf ( "\n" );
+                }
+                printf ( "\n");
                 ptr_spu->cdm.ip++;
                 break;
             }
@@ -139,9 +159,9 @@ int do_this_file ( spu_t* ptr_spu )
             }
             case DIV:
             {
-                int a = StackPop ( ptr_spu->ptr_stk );
                 int b = StackPop ( ptr_spu->ptr_stk );
-                StackPush ( ptr_spu->ptr_stk, b / a );
+                int a = StackPop ( ptr_spu->ptr_stk );
+                StackPush ( ptr_spu->ptr_stk, a / b );
                 ptr_spu->cdm.ip++;
                 break;
             }
@@ -149,8 +169,12 @@ int do_this_file ( spu_t* ptr_spu )
             {
                 int* type_pop = get_arg ( ptr_spu );
 
+//StackDump ( ptr_spu->ptr_stk );
+//printf ( "\n---------------------------\n");
+
+                if ( ptr_spu->ptr_stk->size == 0 )
+fprintf ( stderr, "ZERO ELEMENTS WHILE POPPING! ( ip = %d )\n", ptr_spu->cdm.ip );
                 *type_pop = StackPop ( ptr_spu->ptr_stk );
-                //ptr_spu->cdm.ip++;
                 break;
             }
             case OUT:
@@ -164,7 +188,7 @@ int do_this_file ( spu_t* ptr_spu )
                 {
                     int c = StackPop ( ptr_spu->ptr_stk );
                     printf ( "returned value: " GIVE_MORE_COLOUR ( BOLD, YELLOW, DEF_B ) "%d" SET_DEFAULT_COLOUR "\n", c );
-                    ptr_spu->ptr_stk->data_ptr [ ptr_spu->ptr_stk->size ] = 0;
+                    ptr_spu->ptr_stk->data_ptr [ ptr_spu->ptr_stk->size - 1 ] = 0;
                     ptr_spu->cdm.ip++;
                     break;
                 }
@@ -306,7 +330,7 @@ int do_this_file ( spu_t* ptr_spu )
         }
     }
 
-    return JUICY_BALLS;
+    return FUNC_DONE;
 }
 
 int make_array_with_code ( spu_t* ptr_spu )
@@ -338,7 +362,7 @@ int* get_arg ( spu_t* ptr_spu )
 {
 
     cmd_t *cmd = &ptr_spu->cdm;
-    int operand = cmd->ptr_code [ cmd->ip++ ];
+    int operand = cmd->ptr_code [ ptr_spu->cdm.ip++ ];
 //fprintf  ( stderr, "operand: %d\n", operand );
 
     static int arg_value = 0;
@@ -356,16 +380,16 @@ int* get_arg ( spu_t* ptr_spu )
 
     if ( operand & TYPE_REGISTER)
     {
-        reg_ptr = &( ptr_spu->reg_array [ cmd->ptr_code [ cmd->ip++ ] ] );
+        reg_ptr = &( ptr_spu->reg_array [ cmd->ptr_code [ ptr_spu->cdm.ip++ ] ] );
         arg_value += *reg_ptr;
     }
 
     if ( operand & TYPE_CONSTANT )
-        arg_value += cmd->ptr_code [ cmd->ip++ ];
+        arg_value += cmd->ptr_code [ ptr_spu->cdm.ip++ ];
 
     if ( operand & TYPE_MEMORY )
     {
-        if ( arg_value < RAM_CAPACITY )
+        if ( arg_value < RAM_CAPACITY+1 )
             arg_value_ptr = &( RAM [ arg_value ] );
         else
             fprintf ( stderr, "RAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAM OVERFLOW!\n");

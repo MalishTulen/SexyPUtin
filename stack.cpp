@@ -147,11 +147,11 @@ int StackPop ( Stack_t * ptr_stk )
     }
     else
     {
-        if ( ptr_stk->size < ptr_stk->capacity / 4 )
+        /*if ( ptr_stk->size < ptr_stk->capacity / 4 )
         {
             ptr_stk->data_ptr = ( Stack_Elem_Data_t* ) realloc ( ptr_stk->data_ptr, ( ( ptr_stk->capacity ) / 2 + 1 ) * sizeof ( Stack_Elem_Data_t ) );
             ptr_stk->capacity = ptr_stk->capacity / 2 + 1;
-        }
+        }*/
         (ptr_stk->size)-= 1;
         int ruka = ptr_stk->data_ptr [ ptr_stk->size];
 
